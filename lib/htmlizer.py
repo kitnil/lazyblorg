@@ -11,7 +11,6 @@ import re  # RegEx: for parsing/sanitizing
 import codecs
 from lib.utils import Utils  # for guess_language_from_stopword_percentages()
 from shutil import copyfile  # for copying image files
-import cv2  # for scaling image files to their width of choice
 
 try:
     from werkzeug.utils import secure_filename  # for sanitizing path components
@@ -2451,40 +2450,6 @@ class Htmlizer(object):
             self.logging.critical(message)
             raise HtmlizerException(self.current_entry_id, message)
 
-    def _scale_and_write_image_file(self, image_data, destinationfile, newwidth, newheight):
-        """
-        Writes a scaled image file.
-
-        @param image_data: the original filename of an image
-        @param destinationfile: the filename of the scaled image
-        @param newwidth: string of new width when scaling
-        @param newheight: string of new height when scaling
-        """
-        try:
-            cv2.imwrite(destinationfile,
-                        cv2.resize(image_data, (int(newwidth), int(newheight)), interpolation=cv2.INTER_CUBIC))
-        except:
-            self.logging.critical('Error when scaling file \"' + image_data +
-                                  '\" to file \"' + destinationfile + '\"')
-            raise
-
-    def _copy_image_file_without_exif(self, sourcefilename, destinationfilename):
-        """
-        Copies an image file and remoevs the optional Exif headers.
-
-        @param sourcefilename: the original path to the filename of an image
-        @param destinationfilename: the filename of the copied image
-        """
-        image_file_data = cv2.imread(sourcefilename)
-        height, width = image_file_data.shape[:2]
-        try:
-            cv2.imwrite(destinationfilename,
-                        cv2.resize(image_file_data, (int(width), int(height)), interpolation=cv2.INTER_CUBIC))
-        except:
-            self.logging.critical('Error when copying image file \"' + sourcefilename +
-                                  '\" to file \"' + destinationfilename + '\"')
-            raise
-
     def _copy_a_file(self, sourcefile, destinationfile):
         """
         Copies a file and does exception handling.
@@ -2545,7 +2510,7 @@ class Htmlizer(object):
             if not width and not os.path.isfile(destinationfile):
                 # User did not state any width → use original file but
                 # get rid of exif header by scaling to same size
-                self._copy_image_file_without_exif(image_file_path, destinationfile)
+                pass
 
             elif width and not os.path.isfile(destinationfile):
                 # User did specify a width → resize if necessary
@@ -2571,7 +2536,7 @@ class Htmlizer(object):
                             # size and the width specified by the user, copy
                             # original image instead of interpolate a new one but
                             # get rid of exif header by scaling to same size
-                            self._copy_image_file_without_exif(image_file_path, destinationfile)
+                            pass
 
                         elif os.path.isfile(cached_image_file_name):
                             # If a cached copy is found, check if it still
@@ -2581,14 +2546,12 @@ class Htmlizer(object):
                                 self.logging.debug('CACHE MISS: mtime of cached file "' + cached_image_file_name +
                                                    '" is older than the original file "' + image_file_path +
                                                    '". Therefore I scale a new one to "' + destinationfile + '".')
-                                self._scale_and_write_image_file(image_file_data, destinationfile, newwidth, newheight)
                                 self.stats_images_resized += 1
                                 self._update_image_cache(destinationfile, cached_image_file_name)
                         else:
                             # We did not find any cached file. So generate
                             # a new image and update cache if necessary
                             self.logging.debug('CACHE MISS: no cached file "' + cached_image_file_name + '" found. Scaling a new one.')
-                            self._scale_and_write_image_file(image_file_data, destinationfile, newwidth, newheight)
                             self.stats_images_resized += 1
                             self._update_image_cache(destinationfile, cached_image_file_name)
                 except:

@@ -21,7 +21,7 @@ PYTHONPATH="~/src/lazyblorg:" ./lazyblorg.py \
     --previous-metadata ./NONEXISTING_-_REPLACE_WITH_YOUR_PREVIOUS_METADATA_FILE.pk \
     --new-metadata ./2del-metadata.pk \
     --logfile ./2del-logfile.org \
-    --orgfiles testdata/end_to_end_test/orgfiles/test.org \
+    --orgfiles /org/json.org \
                testdata/end_to_end_test/orgfiles/about-placeholder.org \
                templates/blog-format.org $@
 

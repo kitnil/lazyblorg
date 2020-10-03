@@ -422,8 +422,7 @@ class Lazyblorg(object):
 
         return generate, marked_for_feed, increment_version
 
-
-if __name__ == "__main__":
+def main():
 
     mydescription = "An Org-mode to HTML-blog system for very lazy people. Please refer to \n" + \
                     "https://github.com/novoid/lazyblorg for more information."
@@ -620,6 +619,10 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
 
         logging.info("Received KeyboardInterrupt")
+
+
+if __name__ == "__main__":
+    main()
 
 # END OF FILE ###########################################################
 # Local Variables:
